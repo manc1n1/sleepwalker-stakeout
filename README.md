@@ -1,15 +1,23 @@
-<div>
+<div align="center">
   <img width="300" alt="icon" src="https://github.com/user-attachments/assets/246b65b2-2360-4ed0-a047-64d91ad7d81d" />
 </div>
 
+<br/>
+
 # Sleepwalker Stakeout
 
-A RuneLite plugin that displays a movable (<kbd>Alt</kbd> +
+[![Total installs](http://img.shields.io/endpoint?url=https://api.runelite.net/pluginhub/shields/installs/plugin/sleepwalker-stakeout)](https://runelite.net/plugin-hub/show/sleepwalker-stakeout)
+[![Plugin rank](http://img.shields.io/endpoint?url=https://api.runelite.net/pluginhub/shields/rank/plugin/sleepwalker-stakeout)](https://runelite.net/plugin-hub/show/sleepwalker-stakeout)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/manc1n1/sleepwalker-stakeout/build.yml?branch=master)](https://github.com/manc1n1/sleepwalker-stakeout)
+[![GitHub Tag](https://img.shields.io/github/v/tag/manc1n1/sleepwalker-stakeout?label=Latest%20release)](https://github.com/manc1n1/sleepwalker-stakeout/tags)
+![Dynamic Regex Badge](https://img.shields.io/badge/dynamic/regex?url=https%3A%2F%2Fraw.githubusercontent.com%2Fmanc1n1%2Fsleepwalker-stakeout%2Frefs%2Fheads%2Fmaster%2Frunelite-plugin.properties&search=version%3D(.*)&replace=v%241&label=Git%20version)
+
+A [RuneLite](https://runelite.net/) plugin that displays a movable (<kbd>Alt</kbd> +
 Drag) [Blisterwood stake sprite](https://oldschool.runescape.wiki/w/Blisterwood_stake#/media/File:Blisterwood_stake.png)
 as a fake XP drop whenever your character throws
-a [Blisterwood stake](https://oldschool.runescape.wiki/w/Blisterwood_stake).
+a [Blisterwood stake](https://oldschool.runescape.wiki/w/Blisterwood_stake) in [Old School RuneScape](https://oldschool.runescape.com/).
 
-# Features
+## Features
 
 - Displays a Blisterwood stake sprite when the stake-throw animation is detected
 - Mimics the movement and fade behavior of a RuneLite XP drop
@@ -22,9 +30,9 @@ a [Blisterwood stake](https://oldschool.runescape.wiki/w/Blisterwood_stake).
 - Renders above other overlays for improved visibility
 - No configuration required
 
-# Use Cases
+## Use Cases
 
-## [Phosani's Nightmare](https://oldschool.runescape.wiki/w/Phosani%27s_Nightmare)
+### [Phosani's Nightmare](https://oldschool.runescape.wiki/w/Phosani%27s_Nightmare)
 
 The primary use case is during Phosani's Nightmare, where Blisterwood stakes are used against Sleepwalkers.
 
@@ -35,7 +43,7 @@ The plugin provides an additional visual indicator to confirm that you attacked 
 The additional visual indicator provides a more consistent way to track stake throws without relying exclusively on XP
 drops, character animations, or game-world visuals.
 
-# How It Works
+## How It Works
 
 The plugin listens for animation changes on the local player.
 
@@ -49,7 +57,7 @@ animation Fades out near the end Is automatically removed after the animation co
 
 The animation lasts approximately 1.5 seconds.
 
-# Overlay Position
+## Overlay Position
 
 By default, the plugin automatically positions the Blisterwood stake indicator near RuneLite's standard XP drop area.
 
@@ -61,7 +69,7 @@ The overlay can be moved to any preferred location:
 
 Once manually moved, the plugin stops automatically repositioning the overlay and continues using your custom location.
 
-# Requirements
+## Requirements
 
 - RuneLite
 - A Blisterwood stake equipped when performing the throw animation
@@ -69,7 +77,7 @@ Once manually moved, the plugin stops automatically repositioning the overlay an
 The plugin does not modify game behavior, interact with NPCs, or automate any actions. It only provides a client-side
 visual indicator based on information already available to RuneLite.
 
-# Installation
+## Installation
 
 - Download RuneLite from their website: https://runelite.net
 - Launch RuneLite
@@ -81,7 +89,7 @@ visual indicator based on information already available to RuneLite.
 
 No additional configuration is required.
 
-# Technical Details
+## Technical Details
 
 The plugin detects the Blisterwood stake throw animation and validates the currently equipped weapon before displaying
 the overlay.
@@ -92,7 +100,7 @@ short upward movement and fade animation.
 This prevents unrelated animations from triggering the indicator and ensures the visual is only displayed when the
 player is actually using a Blisterwood stake.
 
-# Development
+## Development
 
 The plugin is written in Java and built using the RuneLite plugin API.
 
@@ -105,9 +113,11 @@ Relevant RuneLite APIs include:
 - `Overlay`
 - `OverlayManager`
 
-# License
+## License
 
-Copyright &copy; 2026 manc1n1
+Copyright &copy; 2026 [manc1n1](https://github.com/manc1n1)
 
-This project is distributed under the BSD 2-Clause License. See the source files or included license for the full
+This project is distributed under the BSD 2-Clause License. See the source files or included [`LICENSE.md`][license-url] for the full
 license text.
+
+[license-url]: https://github.com/manc1n1/sleepwalker-stakeout/blob/master/LICENSE
