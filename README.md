@@ -51,9 +51,11 @@ When the Blisterwood stake throw animation is detected, it verifies that a Blist
 both conditions are satisfied, an animated stake sprite is added to the overlay.
 
 The sprite:
-
-Begins near the bottom of the overlay Travels upward similarly to an XP drop Remains fully visible for most of the
-animation Fades out near the end Is automatically removed after the animation completes
+1. Begins near the bottom of the overlay
+2. Travels upward similarly to an XP drop
+3. Remains fully visible for most of the animation
+4. Fades out near the end
+5. Is automatically removed after the animation completes
 
 The animation lasts approximately 1.5 seconds.
 
