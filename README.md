@@ -119,7 +119,7 @@ Relevant RuneLite APIs include:
 
 Copyright &copy; 2026 [manc1n1](https://github.com/manc1n1)
 
-This project is distributed under the BSD 2-Clause License. See the source files or included [`LICENSE.md`][license-url] for the full
+This project is distributed under the BSD 2-Clause License. See the source files or included [`LICENSE`][license-url] for the full
 license text.
 
 [license-url]: https://github.com/manc1n1/sleepwalker-stakeout/blob/master/LICENSE
