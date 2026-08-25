@@ -45,13 +45,12 @@ import net.runelite.client.ui.overlay.OverlayPosition;
 public class SleepwalkerStakeoutOverlay extends Overlay {
     private static final long DROP_DURATION_NANOS = 1_500_000_000L;
 
-    private static final double DEFAULT_X = 0.67;
-    private static final double DEFAULT_Y = 0.16;
     private static final double SPRITE_SCALE = 0.85;
     private static final double FADE_START = 0.75;
 
     private static final int TRAVEL_Y = 65;
     private static final int FALLBACK_SIZE = 64;
+    private static final int PLAYER_HEIGHT_OFFSET = 20;
 
     private final Client client;
     private final ItemManager itemManager;
@@ -69,7 +68,7 @@ public class SleepwalkerStakeoutOverlay extends Overlay {
 
         setPosition(OverlayPosition.DYNAMIC);
         setMovable(true);
-        setSnappable(false);
+        setSnappable(true);
         setLayer(OverlayLayer.ALWAYS_ON_TOP);
         setPriority(PRIORITY_HIGHEST);
     }
@@ -161,8 +160,18 @@ public class SleepwalkerStakeoutOverlay extends Overlay {
     }
 
     private void updateAutomaticLocation(Dimension size) {
+        if (getPreferredPosition() != null) {
+            usingAutomaticLocation = false;
+            lastAutomaticLocation = null;
+            return;
+        }
+
         final Point preferredLocation = getPreferredLocation();
         final Point automaticLocation = getAutomaticLocation(size);
+
+        if (automaticLocation == null) {
+            return;
+        }
 
         if (preferredLocation == null) {
             setPreferredLocation(automaticLocation);
@@ -178,6 +187,7 @@ public class SleepwalkerStakeoutOverlay extends Overlay {
         if (lastAutomaticLocation != null
                 && !preferredLocation.equals(lastAutomaticLocation)) {
             usingAutomaticLocation = false;
+            lastAutomaticLocation = null;
             return;
         }
 
@@ -189,21 +199,35 @@ public class SleepwalkerStakeoutOverlay extends Overlay {
     }
 
     private Point getAutomaticLocation(Dimension size) {
-        final int canvasWidth = client.getCanvasWidth();
-        final int canvasHeight = client.getCanvasHeight();
+        if (client.getLocalPlayer() == null || stakeSprite == null) {
+            return null;
+        }
 
-        final int x = (int) Math.round(canvasWidth * DEFAULT_X)
-                - size.width / 2;
+        final int heightOffset =
+                client.getLocalPlayer().getLogicalHeight() + PLAYER_HEIGHT_OFFSET;
 
-        final int y = (int) Math.round(canvasHeight * DEFAULT_Y)
-                - size.height / 2;
+        final net.runelite.api.Point imageLocation =
+                client.getLocalPlayer().getCanvasImageLocation(
+                        stakeSprite,
+                        heightOffset
+                );
 
-        final int maxX = Math.max(0, canvasWidth - size.width);
-        final int maxY = Math.max(0, canvasHeight - size.height);
+        if (imageLocation == null) {
+            return null;
+        }
+
+        final int scaledWidth = size.width;
+        final int scaledHeight = size.height - TRAVEL_Y;
+
+        final int xAdjustment =
+                (stakeSprite.getWidth() - scaledWidth) / 2;
+
+        final int yAdjustment =
+                (stakeSprite.getHeight() - scaledHeight) / 2;
 
         return new Point(
-                Math.max(0, Math.min(x, maxX)),
-                Math.max(0, Math.min(y, maxY))
+                imageLocation.getX() + xAdjustment,
+                imageLocation.getY() + yAdjustment - TRAVEL_Y
         );
     }
 }

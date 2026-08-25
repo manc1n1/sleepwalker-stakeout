@@ -25,8 +25,10 @@ a [Blisterwood stake](https://oldschool.runescape.wiki/w/Blisterwood_stake) in [
     - The animation belongs to your local player
     - The Blisterwood stake throw animation is detected
     - A Blisterwood stake is equipped
-- Automatically positions the overlay near the standard XP drop area
-- Overlay can be manually repositioned
+- Positions the overlay directly above the local player by default
+- Automatically follows the player's position until manually moved
+- Can be manually repositioned with <kbd>Alt</kbd> + Drag
+- Supports RuneLite's built-in overlay anchor snapping
 - Renders above other overlays for improved visibility
 - No configuration required
 
@@ -51,7 +53,7 @@ When the Blisterwood stake throw animation is detected, it verifies that a Blist
 both conditions are satisfied, an animated stake sprite is added to the overlay.
 
 The sprite:
-1. Begins near the bottom of the overlay
+1. Appears above the local player or at the user's selected overlay position
 2. Travels upward similarly to an XP drop
 3. Remains fully visible for most of the animation
 4. Fades out near the end
@@ -61,15 +63,20 @@ The animation lasts approximately 1.5 seconds.
 
 ## Overlay Position
 
-By default, the plugin automatically positions the Blisterwood stake indicator near RuneLite's standard XP drop area.
+By default, the Blisterwood stake indicator is positioned directly above the local player and follows the player's
+position on the game canvas.
 
 The overlay can be moved to any preferred location:
-
 - Hold the <kbd>Alt</kbd> key
 - Click and drag the overlay with your mouse
 - Release it at the desired position
 
-Once manually moved, the plugin stops automatically repositioning the overlay and continues using your custom location.
+Once manually moved, the plugin stops following the local player and continues using the selected position.
+
+The overlay also supports RuneLite's built-in anchor points. While moving the overlay, it can be snapped to supported
+positions around the RuneLite client and will remain anchored there.
+
+Resetting (<kbd>Alt</kbd> + Right Click) the overlay position restores the default behavior, causing the indicator to follow the local player again.
 
 ## Requirements
 
@@ -90,30 +97,6 @@ visual indicator based on information already available to RuneLite.
 - Enable it if necessary
 
 No additional configuration is required.
-
-## Technical Details
-
-The plugin detects the Blisterwood stake throw animation and validates the currently equipped weapon before displaying
-the overlay.
-
-The overlay uses RuneLite's `ItemManager` to retrieve the official Blisterwood stake item sprite and renders it using a
-short upward movement and fade animation.
-
-This prevents unrelated animations from triggering the indicator and ensures the visual is only displayed when the
-player is actually using a Blisterwood stake.
-
-## Development
-
-The plugin is written in Java and built using the RuneLite plugin API.
-
-Relevant RuneLite APIs include:
-
-- `AnimationChanged`
-- `ItemContainer`
-- `EquipmentInventorySlot`
-- `ItemManager`
-- `Overlay`
-- `OverlayManager`
 
 ## License
 
