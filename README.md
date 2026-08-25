@@ -17,6 +17,9 @@ Drag) [Blisterwood stake sprite](https://oldschool.runescape.wiki/w/Blisterwood_
 as a fake XP drop whenever your character throws
 a [Blisterwood stake](https://oldschool.runescape.wiki/w/Blisterwood_stake) in [Old School RuneScape](https://oldschool.runescape.com/).
 
+## Demo
+<img width="518" height="524" alt="sleepwalker-stakeout-demo" src="https://github.com/user-attachments/assets/cbe29dae-c689-4b02-9c47-93e39aa6ee22" />
+
 ## Features
 
 - Displays a Blisterwood stake sprite when the stake-throw animation is detected
