@@ -1,0 +1,56 @@
+name: Verify plugin
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Verify version numbers match
+        shell: bash
+        run: |
+          gradle_version="$(sed -n 's/^plugin_version=//p' gradle.properties)"
+          runelite_version="$(sed -n 's/^version=//p' runelite-plugin.properties)"
+
+          if [[ -z "$gradle_version" ]]; then
+            echo "::error file=gradle.properties::plugin_version is missing"
+            exit 1
+          fi
+
+          if [[ -z "$runelite_version" ]]; then
+            echo "::error file=runelite-plugin.properties::version is missing"
+            exit 1
+          fi
+
+          if [[ "$gradle_version" != "$runelite_version" ]]; then
+            echo "::error file=runelite-plugin.properties::Plugin version mismatch (gradle.properties: $gradle_version, runelite-plugin.properties: $runelite_version)"
+            exit 1
+          fi
+
+          echo "Version numbers match: $gradle_version"
+
+      - name: Set up OpenJDK 11
+        uses: actions/setup-java@v6
+        with:
+          java-version: 11
+          distribution: temurin
+          cache: gradle
+
+      - name: Grant execute permission for Gradle Wrapper
+        run: chmod +x gradlew
+
+      - name: Run tests
+        run: ./gradlew clean test --console=plain
