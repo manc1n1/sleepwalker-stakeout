@@ -20,54 +20,82 @@ cd "$script_dir"
 
 gradle_properties="gradle.properties"
 runelite_properties="runelite-plugin.properties"
+plugin_file="src/main/java/com/sleepwalkerstakeout/SleepwalkerStakeoutPlugin.java"
 
-if [[ ! -f "$gradle_properties" ]]; then
-  echo "Error: $gradle_properties not found" >&2
-  exit 1
-fi
+for file in \
+  "$gradle_properties" \
+  "$runelite_properties" \
+  "$plugin_file"
+do
+  if [[ ! -f "$file" ]]; then
+    echo "Error: $file not found" >&2
+    exit 1
+  fi
+done
 
-if [[ ! -f "$runelite_properties" ]]; then
-  echo "Error: $runelite_properties not found" >&2
-  exit 1
-fi
+current_gradle_version="$(
+  sed -n 's/^plugin_version=//p' "$gradle_properties"
+)"
 
-current_version="$(sed -n 's/^plugin_version=//p' "$gradle_properties")"
+current_runelite_version="$(
+  sed -n 's/^version=//p' "$runelite_properties"
+)"
 
-if [[ -z "$current_version" ]]; then
+current_plugin_version="$(
+  sed -nE \
+    's/^[[:space:]]*private static final String PLUGIN_VERSION = "([^"]+)";/\1/p' \
+    "$plugin_file"
+)"
+
+if [[ -z "$current_gradle_version" ]]; then
   echo "Error: plugin_version not found in $gradle_properties" >&2
   exit 1
 fi
 
-if [[ "$current_version" == "$version" ]]; then
-  echo "Version is already $version"
+if [[ -z "$current_runelite_version" ]]; then
+  echo "Error: version not found in $runelite_properties" >&2
+  exit 1
+fi
+
+if [[ -z "$current_plugin_version" ]]; then
+  echo "Error: PLUGIN_VERSION not found in $plugin_file" >&2
+  exit 1
+fi
+
+if [[ "$current_gradle_version" == "$version" \
+   && "$current_runelite_version" == "$version" \
+   && "$current_plugin_version" == "$version" ]]; then
+  echo "Version is already $version in all files"
   exit 0
 fi
 
-replace_version() {
+replace_line() {
   local file="$1"
-  local pattern="$2"
-  local replacement="$3"
+  local expression="$2"
   local temp_file
 
   temp_file="$(mktemp)"
 
-  sed "s/^${pattern}.*/${replacement}/" "$file" > "$temp_file"
+  sed -E "$expression" "$file" > "$temp_file"
   mv "$temp_file" "$file"
 }
 
-replace_version \
+replace_line \
   "$gradle_properties" \
-  "plugin_version=" \
-  "plugin_version=$version"
+  "s|^plugin_version=.*|plugin_version=$version|"
 
-replace_version \
+replace_line \
   "$runelite_properties" \
-  "version=" \
-  "version=$version"
+  "s|^version=.*|version=$version|"
+
+replace_line \
+  "$plugin_file" \
+  "s|^([[:space:]]*private static final String PLUGIN_VERSION = \")[^\"]+(\";)|\1${version}\2|"
 
 echo "Version bumped:"
-echo "  $current_version -> $version"
+echo "  $current_gradle_version -> $version"
 echo
 echo "Updated:"
 echo "  $gradle_properties"
 echo "  $runelite_properties"
+echo "  $plugin_file"
