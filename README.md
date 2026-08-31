@@ -12,22 +12,23 @@
 [![GitHub Tag](https://img.shields.io/github/v/tag/manc1n1/sleepwalker-stakeout?label=Latest%20release)](https://github.com/manc1n1/sleepwalker-stakeout/tags)
 ![Dynamic Regex Badge](https://img.shields.io/badge/dynamic/regex?url=https%3A%2F%2Fraw.githubusercontent.com%2Fmanc1n1%2Fsleepwalker-stakeout%2Frefs%2Fheads%2Fmaster%2Fgradle.properties&search=plugin_version%3D(.*)&replace=v%241&label=Git%20version)
 
-A [RuneLite](https://runelite.net/) plugin that displays a movable (<kbd>Alt</kbd> +
-Drag) [Blisterwood stake sprite](https://oldschool.runescape.wiki/w/Blisterwood_stake#/media/File:Blisterwood_stake.png)
-as a fake XP drop whenever your character throws
-a [Blisterwood stake](https://oldschool.runescape.wiki/w/Blisterwood_stake) in [Old School RuneScape](https://oldschool.runescape.com/).
+A [RuneLite](https://runelite.net/) plugin that displays your equipped weapon's sprite as a moveable (<kbd>Alt</kbd> + Drag) fake XP drop when using a supported weapon against [Sleepwalkers](https://oldschool.runescape.wiki/w/Sleepwalker_(Phosani%27s_Nightmare)) during [Phosani's Nightmare](https://oldschool.runescape.wiki/w/Phosani%27s_Nightmare) in [Old School RuneScape](https://oldschool.runescape.com/).
 
 ## Demo
 <img width="518" height="524" alt="sleepwalker-stakeout-demo" src="https://github.com/user-attachments/assets/cbe29dae-c689-4b02-9c47-93e39aa6ee22" />
 
+<br/>
+
 ## Features
 
-- Displays a Blisterwood stake sprite when the stake-throw animation is detected
+- Displays the equipped weapon's sprite as a fake XP drop when a supported attack animation is detected
 - Mimics the movement and fade behavior of a RuneLite XP drop
 - Only activates when:
     - The animation belongs to your local player
-    - The Blisterwood stake throw animation is detected
-    - A Blisterwood stake is equipped
+    - A supported attack animation is detected
+    - The local player is attacking a Sleepwalker
+    - A supported weapon is equipped
+- Automatically displays the correct sprite for the currently equipped weapon
 - Positions the overlay directly above the local player by default
 - Automatically follows the player's position until manually moved
 - Can be manually repositioned with <kbd>Alt</kbd> + Drag
@@ -35,27 +36,47 @@ a [Blisterwood stake](https://oldschool.runescape.wiki/w/Blisterwood_stake) in [
 - Renders above other overlays for improved visibility
 - No configuration required
 
+## Supported Weapons
+
+Sleepwalker Stakeout currently supports attack animations used by:
+- [Blisterwood stake](https://oldschool.runescape.wiki/w/Blisterwood_stake)
+- [Eye of Ayak](https://oldschool.runescape.wiki/w/Eye_of_Ayak#Charged)
+- [Toxic blowpipe](https://oldschool.runescape.wiki/w/Toxic_blowpipe#Charged)
+- [Blazing blowpipe](https://oldschool.runescape.wiki/w/Blazing_blowpipe#Charged)
+- [Craw's bow](https://oldschool.runescape.wiki/w/Craw%27s_bow#Charged)
+- [Webweaver bow](https://oldschool.runescape.wiki/w/Webweaver_bow#Charged)
+- [Shortbows](https://oldschool.runescape.wiki/w/Shortbow_(weapon))
+- [Longbows](https://oldschool.runescape.wiki/w/Longbow_(weapon))
+- [Darts](https://oldschool.runescape.wiki/w/Dart)
+
+The fake XP drop uses the sprite of the weapon currently equipped, so different weapon variants and dart types display their corresponding item sprite automatically.
+
 ## Use Cases
 
 ### [Phosani's Nightmare](https://oldschool.runescape.wiki/w/Phosani%27s_Nightmare)
 
-The primary use case is during Phosani's Nightmare, where Blisterwood stakes are used against Sleepwalkers.
+The primary use case is during Phosani's Nightmare, where players must quickly attack Sleepwalkers before they reach the Nightmare.
 
-This plugin was created because the XP drops displayed when attacking Sleepwalkers with a Blisterwood stake can be
-unreliable. Sometimes, a successful attack may not produce a visible XP drop, even though the attack still registers.
-The plugin provides an additional visual indicator to confirm that you attacked the Sleepwalker.
+This plugin was created because XP drops when attacking Sleepwalkers can be unreliable. Sometimes, a successful attack may not produce a visible XP drop even though the attack still registers.
 
-The additional visual indicator provides a more consistent way to track stake throws without relying exclusively on XP
-drops, character animations, or game-world visuals.
+Sleepwalker Stakeout provides an additional visual indicator whenever a supported weapon attack is performed against a Sleepwalker.
+
+This provides a more consistent way to track Sleepwalker attacks without relying exclusively on XP drops, character animations, or other game-world visuals.
 
 ## How It Works
 
 The plugin listens for animation changes on the local player.
 
-When the Blisterwood stake throw animation is detected, it verifies that a Blisterwood stake is currently equipped. If
-both conditions are satisfied, an animated stake sprite is added to the overlay.
+When a supported weapon attack animation is detected, the plugin verifies that the local player is currently attacking a Sleepwalker. If both conditions are satisfied, the plugin retrieves the currently equipped weapon and displays its item sprite as an animated fake XP drop.
 
-The sprite:
+For example:
+- Attacking with a Blisterwood stake displays the Blisterwood stake sprite
+- Attacking with an Eye of Ayak displays the Eye of Ayak sprite
+- Attacking with a Toxic or Blazing blowpipe displays the corresponding blowpipe sprite
+- Attacking with a bow displays the currently equipped bow sprite
+- Attacking with a dart displays the currently equipped dart sprite
+
+The fake XP drop:
 1. Appears above the local player or at the user's selected overlay position
 2. Travels upward similarly to an XP drop
 3. Remains fully visible for most of the animation
@@ -64,10 +85,11 @@ The sprite:
 
 The animation lasts approximately 1.5 seconds.
 
+Supported weapon attack animations performed against other NPCs do not trigger the overlay.
+
 ## Overlay Position
 
-By default, the Blisterwood stake indicator is positioned directly above the local player and follows the player's
-position on the game canvas.
+By default, the fake XP drop indicator is positioned directly above the local player and follows the player's position on the game canvas.
 
 The overlay can be moved to any preferred location:
 - Hold the <kbd>Alt</kbd> key
@@ -76,18 +98,23 @@ The overlay can be moved to any preferred location:
 
 Once manually moved, the plugin stops following the local player and continues using the selected position.
 
-The overlay also supports RuneLite's built-in anchor points. While moving the overlay, it can be snapped to supported
-positions around the RuneLite client and will remain anchored there.
+The overlay also supports RuneLite's built-in anchor points. While moving the overlay, it can be snapped to supported positions around the RuneLite client and will remain anchored there.
 
-Resetting (<kbd>Alt</kbd> + Right Click) the overlay position restores the default behavior, causing the indicator to follow the local player again.
+Resetting the overlay with <kbd>Alt</kbd> + Right Click restores the default behavior, causing the indicator to follow the local player again.
+
+## Update Messages
+
+When an update introduces notable changes, Sleepwalker Stakeout may display a one-time message in the chatbox.
+
+Each update message is only shown once per plugin version.
 
 ## Requirements
 
 - RuneLite
-- A Blisterwood stake equipped when performing the throw animation
+- A supported weapon equipped
+- The local player must be attacking a Sleepwalker
 
-The plugin does not modify game behavior, interact with NPCs, or automate any actions. It only provides a client-side
-visual indicator based on information already available to RuneLite.
+The plugin does not modify game behavior, interact with NPCs, automate any actions, or determine whether an attack successfully dealt damage. It only provides a client-side visual indicator when a supported attack animation is detected against a Sleepwalker.
 
 ## Installation
 
@@ -105,7 +132,6 @@ No additional configuration is required.
 
 Copyright &copy; 2026, [manc1n1](https://github.com/manc1n1)
 
-This project is distributed under the BSD 2-Clause License. See the source files or included [`LICENSE`][license-url] for the full
-license text.
+This project is distributed under the BSD 2-Clause License. See the source files or included [`LICENSE`][license-url] for the full license text.
 
 [license-url]: https://github.com/manc1n1/sleepwalker-stakeout/blob/master/LICENSE
