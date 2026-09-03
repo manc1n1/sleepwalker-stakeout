@@ -14,8 +14,13 @@
 
 A [RuneLite](https://runelite.net/) plugin that displays your equipped weapon's sprite as a moveable (<kbd>Alt</kbd> + Drag) fake XP drop when using a supported weapon against [Sleepwalkers](https://oldschool.runescape.wiki/w/Sleepwalker_(Phosani%27s_Nightmare)) during [Phosani's Nightmare](https://oldschool.runescape.wiki/w/Phosani%27s_Nightmare) in [Old School RuneScape](https://oldschool.runescape.com/).
 
+By default, fake XP drops are restricted to Sleepwalker targets. This restriction can optionally be disabled in the plugin settings to display fake XP drops for supported attacks against any target.
+
 ## Demo
-<img width="518" height="524" alt="sleepwalker-stakeout-demo" src="https://github.com/user-attachments/assets/cbe29dae-c689-4b02-9c47-93e39aa6ee22" />
+
+<div>
+  <img width="518" height="524" alt="sleepwalker-stakeout-demo" src="https://github.com/user-attachments/assets/cbe29dae-c689-4b02-9c47-93e39aa6ee22" />
+</div>
 
 <br/>
 
@@ -23,7 +28,7 @@ A [RuneLite](https://runelite.net/) plugin that displays your equipped weapon's 
 
 - Displays the equipped weapon's sprite as a fake XP drop when a supported attack animation is detected
 - Mimics the movement and fade behavior of a RuneLite XP drop
-- Only activates when:
+- By default, only activates when:
     - The animation belongs to your local player
     - A supported attack animation is detected
     - The local player is attacking a Sleepwalker
@@ -34,7 +39,7 @@ A [RuneLite](https://runelite.net/) plugin that displays your equipped weapon's 
 - Can be manually repositioned with <kbd>Alt</kbd> + Drag
 - Supports RuneLite's built-in overlay anchor snapping
 - Renders above other overlays for improved visibility
-- No configuration required
+- Displays optional one-time update messages when new plugin versions are released
 
 ## Supported Weapons
 
@@ -63,11 +68,21 @@ Sleepwalker Stakeout provides an additional visual indicator whenever a supporte
 
 This provides a more consistent way to track Sleepwalker attacks without relying exclusively on XP drops, character animations, or other game-world visuals.
 
+## Other Targets
+
+The plugin can also be configured to display fake XP drops for supported attacks against targets other than Sleepwalkers.
+
+Enabling **Show for all targets** bypasses the default Sleepwalker-only target restriction while keeping all supported weapon and animation checks in place.
+
 ## How It Works
 
 The plugin listens for animation changes on the local player.
 
-When a supported weapon attack animation is detected, the plugin verifies that the local player is currently attacking a Sleepwalker. If both conditions are satisfied, the plugin retrieves the currently equipped weapon and displays its item sprite as an animated fake XP drop.
+When a supported weapon attack animation is detected, the plugin checks the currently equipped weapon and, by default, verifies that the local player is attacking a Sleepwalker.
+
+If the required conditions are satisfied, the plugin retrieves the currently equipped weapon's item sprite and displays it as an animated fake XP drop.
+
+When **Show for all targets** is enabled, the Sleepwalker target check is skipped and supported attack animations can trigger the overlay regardless of the current target.
 
 For example:
 - Attacking with a Blisterwood stake displays the Blisterwood stake sprite
@@ -87,6 +102,26 @@ The animation lasts approximately 1.5 seconds.
 
 Supported weapon attack animations performed against other NPCs do not trigger the overlay.
 
+## Configuration
+
+Sleepwalker Stakeout includes a small set of optional settings.
+
+### Show for all targets
+
+Disabled by default.
+
+When enabled, this setting bypasses the Sleepwalker-only target restriction and allows fake XP drops to appear for supported attacks against any target.
+
+Supported weapon and attack animation checks still apply.
+
+### Show update messages
+
+Enabled by default.
+
+When enabled, Sleepwalker Stakeout may display a one-time message in the RuneLite chatbox when a new plugin version introduces notable changes.
+
+Disabling this setting prevents future update messages from being displayed.
+
 ## Overlay Position
 
 By default, the fake XP drop indicator is positioned directly above the local player and follows the player's position on the game canvas.
@@ -104,17 +139,22 @@ Resetting the overlay with <kbd>Alt</kbd> + Right Click restores the default beh
 
 ## Update Messages
 
-When an update introduces notable changes, Sleepwalker Stakeout may display a one-time message in the chatbox.
+When an update introduces notable changes, Sleepwalker Stakeout may display a one-time message in the RuneLite chatbox.
 
-Each update message is only shown once per plugin version.
+Each update message is shown at most once per plugin version.
+
+Update messages can be disabled at any time using the **Show update messages** setting.
 
 ## Requirements
 
 - RuneLite
 - A supported weapon equipped
 - The local player must be attacking a Sleepwalker
+- A Sleepwalker target when **Show for all targets** is disabled
 
-The plugin does not modify game behavior, interact with NPCs, automate any actions, or determine whether an attack successfully dealt damage. It only provides a client-side visual indicator when a supported attack animation is detected against a Sleepwalker.
+The plugin does not modify game behavior, interact with NPCs, automate any actions, or determine whether an attack successfully dealt damage.
+
+It only provides a client-side visual indicator when a supported attack animation is detected and the configured target requirements are satisfied.
 
 ## Installation
 
@@ -126,7 +166,7 @@ The plugin does not modify game behavior, interact with NPCs, automate any actio
 - Click Install
 - Enable it if necessary
 
-No additional configuration is required.
+The default settings are designed for use during Phosani's Nightmare and can be adjusted from the RuneLite plugin configuration panel.
 
 ## License
 
