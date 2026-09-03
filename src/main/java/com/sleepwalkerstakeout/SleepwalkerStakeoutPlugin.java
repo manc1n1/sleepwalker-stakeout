@@ -25,10 +25,20 @@
  */
 package com.sleepwalkerstakeout;
 
+import com.google.inject.Provides;
+
 import java.util.Set;
 import javax.inject.Inject;
 
-import net.runelite.api.*;
+import net.runelite.api.Actor;
+import net.runelite.api.ChatMessageType;
+import net.runelite.api.Client;
+import net.runelite.api.EquipmentInventorySlot;
+import net.runelite.api.GameState;
+import net.runelite.api.Item;
+import net.runelite.api.ItemContainer;
+import net.runelite.api.NPC;
+import net.runelite.api.Player;
 import net.runelite.api.events.AnimationChanged;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.gameval.InventoryID;
@@ -43,7 +53,7 @@ import net.runelite.client.ui.overlay.OverlayManager;
 
 @PluginDescriptor(
         name = "Sleepwalker Stakeout",
-        description = "Displays weapon sprites as fake XP drops when attacking Sleepwalkers",
+        description = "Weapon sprites as fake XP drops",
         tags = {
                 "phosani",
                 "nightmare",
@@ -58,20 +68,22 @@ import net.runelite.client.ui.overlay.OverlayManager;
                 "boss",
                 "fake",
                 "xp",
-                "drop"
+                "drop",
+                "tag",
+                "npc"
         }
 )
+
 public class SleepwalkerStakeoutPlugin extends Plugin {
-    private static final String CONFIG_GROUP = "sleepwalkerstakeout";
     private static final String CONFIG_LAST_SEEN_VERSION = "lastSeenVersion";
 
-    private static final String PLUGIN_VERSION = "1.1.0";
+    private static final String PLUGIN_VERSION = "1.2.0";
 
     private static final String UPDATE_MESSAGE =
             "<colHIGHLIGHT>Sleepwalker Stakeout v" + PLUGIN_VERSION + ":<br>"
-                    + "<colHIGHLIGHT>* Added support for more commonly used Sleepwalker weapons.<br>"
-                    + "<colHIGHLIGHT>* Now supports the Eye of Ayak, Toxic and Blazing blowpipes, bows, and darts.<br>"
-                    + "<colHIGHLIGHT>* Fake XP drops now only appear when attacking Sleepwalkers.";
+                    + "<colHIGHLIGHT>* Added a setting to toggle fake XP drops for all targets.<br>"
+                    + "<colHIGHLIGHT>* Sleepwalker-only targeting remains enabled by default.<br>"
+                    + "<colHIGHLIGHT>* Added an option to disable future plugin update messages.";
 
     private static final int TARGET_NPC_ID = 9470; // Sleepwalker (Phosani's Nightmare)
 
@@ -109,6 +121,16 @@ public class SleepwalkerStakeoutPlugin extends Plugin {
     @Inject
     private SleepwalkerStakeoutOverlay overlay;
 
+    @Inject
+    private SleepwalkerStakeoutConfig config;
+
+    @Provides
+    SleepwalkerStakeoutConfig provideConfig(ConfigManager configManager) {
+        return configManager.getConfig(
+                SleepwalkerStakeoutConfig.class
+        );
+    }
+
     @Override
     protected void startUp() {
         overlayManager.add(overlay);
@@ -145,7 +167,8 @@ public class SleepwalkerStakeoutPlugin extends Plugin {
             return;
         }
 
-        if (!isAttackingTargetNpc(localPlayer)) {
+        if (!config.showForAllTargets()
+                && !isAttackingTargetNpc(localPlayer)) {
             return;
         }
 
@@ -164,19 +187,32 @@ public class SleepwalkerStakeoutPlugin extends Plugin {
         }
 
         final String lastSeenVersion = configManager.getConfiguration(
-                CONFIG_GROUP,
+                SleepwalkerStakeoutConfig.GROUP,
                 CONFIG_LAST_SEEN_VERSION
         );
+
+        if (lastSeenVersion == null) {
+            configManager.setConfiguration(
+                    SleepwalkerStakeoutConfig.GROUP,
+                    CONFIG_LAST_SEEN_VERSION,
+                    PLUGIN_VERSION
+            );
+            return;
+        }
 
         if (PLUGIN_VERSION.equals(lastSeenVersion)) {
             return;
         }
 
         configManager.setConfiguration(
-                CONFIG_GROUP,
+                SleepwalkerStakeoutConfig.GROUP,
                 CONFIG_LAST_SEEN_VERSION,
                 PLUGIN_VERSION
         );
+
+        if (!config.showUpdateMessages()) {
+            return;
+        }
 
         chatMessageManager.queue(
                 QueuedMessage.builder()
