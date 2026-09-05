@@ -35,11 +35,13 @@ tasks.withType(JavaCompile).configureEach {
     options.release.set(11)
 }
 
+def runeLiteDevHome = layout.projectDirectory.dir('.runelite-dev').asFile
+
 tasks.register('run', JavaExec) {
     classpath = sourceSets.test.runtimeClasspath
     mainClass = pluginMainClass
 
-    jvmArgs "-ea"
+    jvmArgs "-ea", "-Duser.home=${runeLiteDevHome.absolutePath}"
     args "--developer-mode", "--debug"
 }
 
