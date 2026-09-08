@@ -79,8 +79,8 @@ public class SleepwalkerStakeoutPlugin extends Plugin {
     private static final String UPDATE_MESSAGE =
             "<colHIGHLIGHT>Sleepwalker Stakeout v" + PLUGIN_VERSION + ":<br>"
                     + "<colHIGHLIGHT>* Added sound support for fake XP drops.<br>"
-                    + "<colHIGHLIGHT>* Added a sidebar sound panel for selecting and previewing sounds.<br>"
-                    + "<colHIGHLIGHT>* Added sound volume and sidebar visibility controls.<br>"
+                    + "<colHIGHLIGHT>* Added a plugin panel for selecting and previewing sounds.<br>"
+                    + "<colHIGHLIGHT>* Added sound volume and plugin panel visibility controls.<br>"
                     + "<colHIGHLIGHT>* Added support for additional .wav sound files.";
 
     private static final int TARGET_NPC_ID = 9470; // Sleepwalker (Phosani's Nightmare)
