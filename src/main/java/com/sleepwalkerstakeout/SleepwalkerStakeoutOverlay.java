@@ -25,24 +25,20 @@
  */
 package com.sleepwalkerstakeout;
 
-import java.awt.AlphaComposite;
-import java.awt.Composite;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.image.BufferedImage;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
-import javax.inject.Inject;
-
 import net.runelite.api.Client;
 import net.runelite.api.Player;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
+
+import javax.inject.Inject;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class SleepwalkerStakeoutOverlay extends Overlay {
     private static final long DROP_DURATION_NANOS = 1_500_000_000L;
@@ -89,7 +85,8 @@ public class SleepwalkerStakeoutOverlay extends Overlay {
     }
 
     void addDrop(int itemId) {
-        final BufferedImage sprite = getSprite(itemId);
+        final BufferedImage sprite =
+                getSprite(itemId);
 
         if (sprite == null) {
             return;
@@ -109,11 +106,14 @@ public class SleepwalkerStakeoutOverlay extends Overlay {
     }
 
     @Override
-    public Dimension render(Graphics2D graphics) {
-        final Dimension size = new Dimension(
-                SPRITE_AREA_SIZE,
-                SPRITE_AREA_SIZE + TRAVEL_Y
-        );
+    public Dimension render(
+            Graphics2D graphics
+    ) {
+        final Dimension size =
+                new Dimension(
+                        SPRITE_AREA_SIZE,
+                        SPRITE_AREA_SIZE + TRAVEL_Y
+                );
 
         updateAutomaticLocation();
 
@@ -121,7 +121,8 @@ public class SleepwalkerStakeoutOverlay extends Overlay {
             return size;
         }
 
-        final long now = System.nanoTime();
+        final long now =
+                System.nanoTime();
 
         drops.removeIf(
                 drop ->
@@ -133,7 +134,8 @@ public class SleepwalkerStakeoutOverlay extends Overlay {
             return size;
         }
 
-        final Composite oldComposite = graphics.getComposite();
+        final Composite oldComposite =
+                graphics.getComposite();
 
         try {
             for (FakeDrop drop : drops) {
@@ -150,7 +152,9 @@ public class SleepwalkerStakeoutOverlay extends Overlay {
         return size;
     }
 
-    private BufferedImage getSprite(int itemId) {
+    private BufferedImage getSprite(
+            int itemId
+    ) {
         return sprites.computeIfAbsent(
                 itemId,
                 itemManager::getImage
@@ -166,25 +170,29 @@ public class SleepwalkerStakeoutOverlay extends Overlay {
                 (double) (now - drop.startTime)
                         / DROP_DURATION_NANOS;
 
-        final double progress = Math.max(
-                0.0,
-                Math.min(1.0, rawProgress)
-        );
+        final double progress =
+                Math.max(
+                        0.0,
+                        Math.min(1.0, rawProgress)
+                );
 
-        final float alpha = progress < FADE_START
-                ? 1.0f
-                : (float) (
-                (1.0 - progress)
-                        / (1.0 - FADE_START)
-        );
+        final float alpha =
+                progress < FADE_START
+                        ? 1.0f
+                        : (float) (
+                        (1.0 - progress)
+                                / (1.0 - FADE_START)
+                );
 
-        final int width = (int) Math.round(
-                drop.sprite.getWidth() * SPRITE_SCALE
-        );
+        final int width =
+                (int) Math.round(
+                        drop.sprite.getWidth() * SPRITE_SCALE
+                );
 
-        final int height = (int) Math.round(
-                drop.sprite.getHeight() * SPRITE_SCALE
-        );
+        final int height =
+                (int) Math.round(
+                        drop.sprite.getHeight() * SPRITE_SCALE
+                );
 
         final int x =
                 (SPRITE_AREA_SIZE - width) / 2;
@@ -261,7 +269,8 @@ public class SleepwalkerStakeoutOverlay extends Overlay {
     }
 
     private Point getAutomaticLocation() {
-        final Player localPlayer = client.getLocalPlayer();
+        final Player localPlayer =
+                client.getLocalPlayer();
 
         if (localPlayer == null) {
             return null;
