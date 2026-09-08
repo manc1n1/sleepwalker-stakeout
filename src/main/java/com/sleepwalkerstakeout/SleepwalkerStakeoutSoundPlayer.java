@@ -27,10 +27,12 @@ package com.sleepwalkerstakeout;
 
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.RuneLite;
+import net.runelite.client.audio.AudioPlayer;
 
 import javax.inject.Inject;
-import javax.sound.sampled.*;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -50,12 +52,15 @@ public class SleepwalkerStakeoutSoundPlayer {
                     "sleepwalker-stakeout/sounds"
             );
 
+    private final AudioPlayer audioPlayer;
     private final ScheduledExecutorService executor;
 
     @Inject
     SleepwalkerStakeoutSoundPlayer(
+            AudioPlayer audioPlayer,
             ScheduledExecutorService executor
     ) {
+        this.audioPlayer = audioPlayer;
         this.executor = executor;
     }
 
@@ -228,132 +233,41 @@ public class SleepwalkerStakeoutSoundPlayer {
             return;
         }
 
-        executor.execute(() ->
-                playScaled(
+        final float gain =
+                volumeToGain(clampedVolume);
+
+        executor.execute(() -> {
+            try {
+                audioPlayer.play(
                         soundFile,
-                        clampedVolume,
+                        gain
+                );
+            } catch (Exception ex) {
+                log.warn(
+                        "Unable to play sound: {}",
+                        soundFile,
+                        ex
+                );
+
+                reportError(
+                        "Unsupported or unreadable WAV file",
                         onError
-                )
-        );
+                );
+            }
+        });
     }
 
-    private void playScaled(
-            File soundFile,
-            int volume,
-            Consumer<String> onError
-    ) {
-        try (
-                AudioInputStream originalStream =
-                        AudioSystem.getAudioInputStream(
-                                soundFile
-                        )
-        ) {
-            final AudioFormat sourceFormat =
-                    originalStream.getFormat();
-
-            final AudioFormat targetFormat =
-                    new AudioFormat(
-                            AudioFormat.Encoding.PCM_SIGNED,
-                            sourceFormat.getSampleRate(),
-                            16,
-                            sourceFormat.getChannels(),
-                            sourceFormat.getChannels() * 2,
-                            sourceFormat.getSampleRate(),
-                            false
-                    );
-
-            if (!AudioSystem.isConversionSupported(
-                    targetFormat,
-                    sourceFormat
-            )) {
-                reportError(
-                        "Unsupported WAV format",
-                        onError
-                );
-                return;
-            }
-
-            try (
-                    AudioInputStream convertedStream =
-                            AudioSystem.getAudioInputStream(
-                                    targetFormat,
-                                    originalStream
-                            )
-            ) {
-                final byte[] audioBytes =
-                        readAllBytes(convertedStream);
-
-                final double multiplier =
-                        volume / 100.0;
-
-                applyVolume(
-                        audioBytes,
-                        multiplier
-                );
-
-                try (
-                        ByteArrayInputStream byteStream =
-                                new ByteArrayInputStream(
-                                        audioBytes
-                                );
-
-                        AudioInputStream adjustedStream =
-                                new AudioInputStream(
-                                        byteStream,
-                                        targetFormat,
-                                        audioBytes.length
-                                                / targetFormat.getFrameSize()
-                                )
-                ) {
-                    final Clip clip =
-                            AudioSystem.getClip();
-
-                    clip.open(adjustedStream);
-
-                    clip.addLineListener(event -> {
-                        if (event.getType()
-                                == LineEvent.Type.STOP) {
-                            clip.close();
-                        }
-                    });
-
-                    clip.start();
-                }
-            }
-        } catch (UnsupportedAudioFileException ex) {
-            log.warn(
-                    "Unsupported sound file: {}",
-                    soundFile,
-                    ex
-            );
-
-            reportError(
-                    "Unsupported or invalid WAV file",
-                    onError
-            );
-        } catch (IOException ex) {
-            log.warn(
-                    "Unable to read sound: {}",
-                    soundFile,
-                    ex
-            );
-
-            reportError(
-                    "Unable to read sound file",
-                    onError
-            );
-        } catch (LineUnavailableException ex) {
-            log.warn(
-                    "Unable to play sound: {}",
-                    soundFile,
-                    ex
-            );
-
-            reportError(
-                    "Audio output is unavailable",
-                    onError
-            );
+    private float volumeToGain(int volume) {
+        if (volume >= 100) {
+            return 0.0f;
         }
+
+        final double linearVolume =
+                volume / 100.0;
+
+        return (float) (
+                20.0 * Math.log10(linearVolume)
+        );
     }
 
     private void reportError(
@@ -365,58 +279,5 @@ public class SleepwalkerStakeoutSoundPlayer {
         if (onError != null) {
             onError.accept(message);
         }
-    }
-
-    private void applyVolume(
-            byte[] audio,
-            double multiplier
-    ) {
-        for (int i = 0; i < audio.length - 1; i += 2) {
-            final int sample =
-                    (audio[i + 1] << 8)
-                            | (audio[i] & 0xFF);
-
-            final int scaled =
-                    (int) Math.round(
-                            sample * multiplier
-                    );
-
-            final short result =
-                    (short) Math.max(
-                            Short.MIN_VALUE,
-                            Math.min(
-                                    Short.MAX_VALUE,
-                                    scaled
-                            )
-                    );
-
-            audio[i] =
-                    (byte) (result & 0xFF);
-
-            audio[i + 1] =
-                    (byte) ((result >> 8) & 0xFF);
-        }
-    }
-
-    private byte[] readAllBytes(
-            AudioInputStream input
-    ) throws IOException {
-        final ByteArrayOutputStream output =
-                new ByteArrayOutputStream();
-
-        final byte[] buffer =
-                new byte[4096];
-
-        int read;
-
-        while ((read = input.read(buffer)) != -1) {
-            output.write(
-                    buffer,
-                    0,
-                    read
-            );
-        }
-
-        return output.toByteArray();
     }
 }
