@@ -26,19 +26,7 @@
 package com.sleepwalkerstakeout;
 
 import com.google.inject.Provides;
-
-import java.util.Set;
-import javax.inject.Inject;
-
-import net.runelite.api.Actor;
-import net.runelite.api.ChatMessageType;
-import net.runelite.api.Client;
-import net.runelite.api.EquipmentInventorySlot;
-import net.runelite.api.GameState;
-import net.runelite.api.Item;
-import net.runelite.api.ItemContainer;
-import net.runelite.api.NPC;
-import net.runelite.api.Player;
+import net.runelite.api.*;
 import net.runelite.api.events.AnimationChanged;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.gameval.InventoryID;
@@ -47,9 +35,18 @@ import net.runelite.client.chat.ChatMessageManager;
 import net.runelite.client.chat.QueuedMessage;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.ui.ClientToolbar;
+import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.ui.overlay.OverlayManager;
+import net.runelite.client.util.ImageUtil;
+
+import javax.inject.Inject;
+import javax.swing.*;
+import java.awt.image.BufferedImage;
+import java.util.Set;
 
 @PluginDescriptor(
         name = "Sleepwalker Stakeout",
@@ -77,13 +74,14 @@ import net.runelite.client.ui.overlay.OverlayManager;
 public class SleepwalkerStakeoutPlugin extends Plugin {
     private static final String CONFIG_LAST_SEEN_VERSION = "lastSeenVersion";
 
-    private static final String PLUGIN_VERSION = "1.2.0";
+    private static final String PLUGIN_VERSION = "1.3.0";
 
     private static final String UPDATE_MESSAGE =
             "<colHIGHLIGHT>Sleepwalker Stakeout v" + PLUGIN_VERSION + ":<br>"
-                    + "<colHIGHLIGHT>* Added a setting to toggle fake XP drops for all targets.<br>"
-                    + "<colHIGHLIGHT>* Sleepwalker-only targeting remains enabled by default.<br>"
-                    + "<colHIGHLIGHT>* Added an option to disable future plugin update messages.";
+                    + "<colHIGHLIGHT>* Added sound support for fake XP drops.<br>"
+                    + "<colHIGHLIGHT>* Added a sidebar sound panel for selecting and previewing sounds.<br>"
+                    + "<colHIGHLIGHT>* Added sound volume and sidebar visibility controls.<br>"
+                    + "<colHIGHLIGHT>* Added support for additional .wav sound files.";
 
     private static final int TARGET_NPC_ID = 9470; // Sleepwalker (Phosani's Nightmare)
 
@@ -94,14 +92,15 @@ public class SleepwalkerStakeoutPlugin extends Plugin {
     private static final int BOW_ANIMATION = 426;
     private static final int DART_ANIMATION = 7554;
 
-    private static final Set<Integer> SUPPORTED_ANIMATIONS = Set.of(
-            BLISTERWOOD_STAKE_ANIMATION,
-            EYE_OF_AYAK_ANIMATION,
-            BLOWPIPE_ANIMATION,
-            BLAZING_BLOWPIPE_ANIMATION,
-            BOW_ANIMATION,
-            DART_ANIMATION
-    );
+    private static final Set<Integer> SUPPORTED_ANIMATIONS =
+            Set.of(
+                    BLISTERWOOD_STAKE_ANIMATION,
+                    EYE_OF_AYAK_ANIMATION,
+                    BLOWPIPE_ANIMATION,
+                    BLAZING_BLOWPIPE_ANIMATION,
+                    BOW_ANIMATION,
+                    DART_ANIMATION
+            );
 
     @Inject
     private Client client;
@@ -113,6 +112,9 @@ public class SleepwalkerStakeoutPlugin extends Plugin {
     private ConfigManager configManager;
 
     @Inject
+    private SleepwalkerStakeoutConfig config;
+
+    @Inject
     private ChatMessageManager chatMessageManager;
 
     @Inject
@@ -122,10 +124,18 @@ public class SleepwalkerStakeoutPlugin extends Plugin {
     private SleepwalkerStakeoutOverlay overlay;
 
     @Inject
-    private SleepwalkerStakeoutConfig config;
+    private ClientToolbar clientToolbar;
+
+    @Inject
+    private SleepwalkerStakeoutSoundPlayer soundPlayer;
+
+    private NavigationButton navButton;
+    private SleepwalkerStakeoutSoundPanel soundPanel;
 
     @Provides
-    SleepwalkerStakeoutConfig provideConfig(ConfigManager configManager) {
+    SleepwalkerStakeoutConfig provideConfig(
+            ConfigManager configManager
+    ) {
         return configManager.getConfig(
                 SleepwalkerStakeoutConfig.class
         );
@@ -135,18 +145,30 @@ public class SleepwalkerStakeoutPlugin extends Plugin {
     protected void startUp() {
         overlayManager.add(overlay);
 
-        clientThread.invokeLater(this::showUpdateMessageIfNeeded);
+        soundPlayer.initialize();
+
+        if (config.showPluginPanel()) {
+            addNavigation();
+        }
+
+        clientThread.invokeLater(
+                this::showUpdateMessageIfNeeded
+        );
     }
 
     @Override
     protected void shutDown() {
         overlayManager.remove(overlay);
         overlay.clear();
+
+        removeNavigation();
     }
 
     @SuppressWarnings("unused")
     @Subscribe
-    public void onGameStateChanged(GameStateChanged event) {
+    public void onGameStateChanged(
+            GameStateChanged event
+    ) {
         if (event.getGameState() == GameState.LOGGED_IN) {
             showUpdateMessageIfNeeded();
         }
@@ -154,10 +176,37 @@ public class SleepwalkerStakeoutPlugin extends Plugin {
 
     @SuppressWarnings("unused")
     @Subscribe
-    public void onAnimationChanged(AnimationChanged event) {
+    public void onConfigChanged(
+            ConfigChanged event
+    ) {
+        if (!event.getGroup().equals(
+                SleepwalkerStakeoutConfig.GROUP
+        )) {
+            return;
+        }
+
+        if (!event.getKey().equals("showSidePanel")) {
+            return;
+        }
+
+        SwingUtilities.invokeLater(() -> {
+            if (config.showPluginPanel()) {
+                addNavigation();
+            } else {
+                removeNavigation();
+            }
+        });
+    }
+
+    @SuppressWarnings("unused")
+    @Subscribe
+    public void onAnimationChanged(
+            AnimationChanged event
+    ) {
         final Player localPlayer = client.getLocalPlayer();
 
-        if (localPlayer == null || event.getActor() != localPlayer) {
+        if (localPlayer == null
+                || event.getActor() != localPlayer) {
             return;
         }
 
@@ -179,6 +228,49 @@ public class SleepwalkerStakeoutPlugin extends Plugin {
         }
 
         overlay.addDrop(weaponId);
+
+        if (config.playSound()) {
+            soundPlayer.play(
+                    config.selectedSound(),
+                    config.soundVolume()
+            );
+        }
+    }
+
+    private void addNavigation() {
+        if (navButton != null) {
+            return;
+        }
+
+        soundPanel = injector.getInstance(
+                SleepwalkerStakeoutSoundPanel.class
+        );
+
+        final BufferedImage icon =
+                ImageUtil.loadImageResource(
+                        getClass(),
+                        "panel_icon.png"
+                );
+
+        navButton = NavigationButton.builder()
+                .tooltip("Sleepwalker Stakeout")
+                .icon(icon)
+                .priority(Integer.MAX_VALUE)
+                .panel(soundPanel)
+                .build();
+
+        clientToolbar.addNavigation(navButton);
+    }
+
+    private void removeNavigation() {
+        if (navButton == null) {
+            return;
+        }
+
+        clientToolbar.removeNavigation(navButton);
+
+        navButton = null;
+        soundPanel = null;
     }
 
     private void showUpdateMessageIfNeeded() {
@@ -222,7 +314,9 @@ public class SleepwalkerStakeoutPlugin extends Plugin {
         );
     }
 
-    private boolean isAttackingTargetNpc(Player localPlayer) {
+    private boolean isAttackingTargetNpc(
+            Player localPlayer
+    ) {
         final Actor interacting = localPlayer.getInteracting();
 
         if (!(interacting instanceof NPC)) {

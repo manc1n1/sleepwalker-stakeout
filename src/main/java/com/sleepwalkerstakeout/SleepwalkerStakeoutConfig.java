@@ -25,27 +25,74 @@
  */
 package com.sleepwalkerstakeout;
 
-import net.runelite.client.config.Config;
-import net.runelite.client.config.ConfigGroup;
-import net.runelite.client.config.ConfigItem;
+import net.runelite.client.config.*;
 
 @ConfigGroup(SleepwalkerStakeoutConfig.GROUP)
 public interface SleepwalkerStakeoutConfig extends Config {
     String GROUP = "sleepwalkerstakeout";
 
+    String SELECTED_SOUND_KEY = "selectedSound";
+
     @ConfigItem(
             keyName = "showForAllTargets",
             name = "Show for all targets",
-            description = "Bypass the Sleepwalker-only restriction and show fake XP drops for supported weapons against any target"
+            description = "Bypass the Sleepwalker-only restriction for supported attacks",
+            position = 0
     )
     default boolean showForAllTargets() {
         return false;
     }
 
     @ConfigItem(
+            keyName = "playSound",
+            name = "Play sound",
+            description = "Play the selected sound when a fake XP drop appears",
+            position = 1
+    )
+    default boolean playSound() {
+        return false;
+    }
+
+    @Range(
+            min = 0,
+            max = 100
+    )
+    @Units(Units.PERCENT)
+    @ConfigItem(
+            keyName = "soundVolume",
+            name = "Sound volume",
+            description = "Adjust the volume of the sound",
+            position = 2
+    )
+    default int soundVolume() {
+        return 50;
+    }
+
+    @ConfigItem(
+            keyName = "showPluginPanel",
+            name = "Show plugin panel",
+            description = "Show the plugin panel in the side nav. The entire plugin will still operate if the panel is hidden",
+            position = 3
+    )
+    default boolean showPluginPanel() {
+        return true;
+    }
+
+    @ConfigItem(
+            keyName = SELECTED_SOUND_KEY,
+            name = "Selected sound",
+            description = "Currently selected sound",
+            hidden = true
+    )
+    default String selectedSound() {
+        return "sleepwalker.wav";
+    }
+
+    @ConfigItem(
             keyName = "showUpdateMessages",
             name = "Show update messages",
-            description = "Show a one-time chat message when Sleepwalker Stakeout is updated"
+            description = "Show a one-time chat message when Sleepwalker Stakeout is updated",
+            position = 4
     )
     default boolean showUpdateMessages() {
         return true;
