@@ -266,7 +266,7 @@ Update messages can be disabled at any time using the **Show update messages** s
 - A supported weapon equipped
 - The local player must be attacking a Sleepwalker
 - A Sleepwalker target when **Show for all targets** is disabled
-- Sound effects require **Play sound** to be enabled
+- Sounds require **Play sound** to be enabled
 
 The plugin does not modify game behavior, interact with NPCs, automate any actions, or determine whether an attack
 successfully dealt damage.
