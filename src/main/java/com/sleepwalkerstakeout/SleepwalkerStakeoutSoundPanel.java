@@ -30,7 +30,6 @@ import net.runelite.client.config.ConfigManager;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.PluginPanel;
 import net.runelite.client.util.ImageUtil;
-import net.runelite.client.util.LinkBrowser;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
@@ -133,12 +132,6 @@ public class SleepwalkerStakeoutSoundPanel extends PluginPanel {
                         "/com/sleepwalkerstakeout/icons/reload_icon.png"
                 );
 
-        final BufferedImage folderImage =
-                ImageUtil.loadImageResource(
-                        getClass(),
-                        "/com/sleepwalkerstakeout/icons/folder_icon.png"
-                );
-
         final JButton reloadButton =
                 createIconButton(
                         refreshImage,
@@ -149,18 +142,7 @@ public class SleepwalkerStakeoutSoundPanel extends PluginPanel {
                 event -> reloadSounds()
         );
 
-        final JButton openFolderButton =
-                createIconButton(
-                        folderImage,
-                        "View the plugin directory, where sound files should be placed, in the system file browser"
-                );
-
-        openFolderButton.addActionListener(
-                event -> openSoundDirectory()
-        );
-
         headerButtons.add(reloadButton);
-        headerButtons.add(openFolderButton);
 
         headerPanel.add(
                 headerButtons,
@@ -178,7 +160,7 @@ public class SleepwalkerStakeoutSoundPanel extends PluginPanel {
         /*
          * Instructions
          */
-        final JLabel instructions = createInstructions();
+        final JTextArea instructions = createInstructions();
 
         content.add(instructions);
 
@@ -300,22 +282,29 @@ public class SleepwalkerStakeoutSoundPanel extends PluginPanel {
     }
 
     @Nonnull
-    private static JLabel createInstructions() {
-        final JLabel instructions =
-                new JLabel(
-                        "<html>"
-                                + "Add <b>.wav</b> files using the folder icon.<br>"
-                                + "<br>"
-                                + "Use reload to refresh the list after adding or removing files.<br>"
-                                + "<br>"
+    private static JTextArea createInstructions() {
+        final JTextArea instructions =
+                new JTextArea(
+                        "Add .wav files to directory:\n"
+                                + ".runelite/\n"
+                                + "sleepwalker-stakeout/\n"
+                                + "sounds\n\n"
+                                + "Use reload after adding or removing files.\n\n"
                                 + "Your selected sound is saved automatically."
-                                + "</html>"
                 );
 
-        instructions.setAlignmentX(LEFT_ALIGNMENT);
+        instructions.setEditable(false);
+        instructions.setFocusable(false);
+        instructions.setOpaque(false);
+        instructions.setLineWrap(true);
+        instructions.setWrapStyleWord(true);
+
         instructions.setForeground(
                 ColorScheme.LIGHT_GRAY_COLOR
         );
+
+        instructions.setAlignmentX(LEFT_ALIGNMENT);
+
         return instructions;
     }
 
@@ -424,15 +413,5 @@ public class SleepwalkerStakeoutSoundPanel extends PluginPanel {
         } finally {
             reloading = false;
         }
-    }
-
-    private void openSoundDirectory() {
-        soundPlayer.initialize();
-
-        LinkBrowser.open(
-                SleepwalkerStakeoutSoundPlayer
-                        .SOUND_DIR
-                        .toString()
-        );
     }
 }
