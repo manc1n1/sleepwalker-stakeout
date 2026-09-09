@@ -157,11 +157,8 @@ The plugin panel can be used to:
 - Select the active sound
 - Preview the selected sound
 - Reload the sound list after adding or removing files
-- Open the sounds directory in the system file browser
 
 The currently selected sound is saved automatically and restored the next time RuneLite is opened.
-
-If the selected file is removed, the sound list can be reloaded and another available sound selected.
 
 > [!NOTE]
 > WAV files must use an audio format supported by the Java audio system used by RuneLite. Files that cannot be decoded
@@ -169,14 +166,14 @@ may not be playable.
 
 ## Plugin Panel
 
-When enabled, Sleepwalker Stakeout adds a button to the RuneLite side nav.
+When enabled, Sleepwalker Stakeout adds an icon to the RuneLite side nav.
 
 The panel provides controls for managing available sounds without requiring filenames to be entered manually.
 
 To add a sound:
 
 1. Open the Sleepwalker Stakeout plugin panel
-2. Click the folder icon to open the sounds directory
+2. Open the sounds directory `.runelite/sleepwalker-stakeout/sounds`
 3. Add a `.wav` file to the directory
 4. Click the reload icon
 5. Select the sound from the dropdown
