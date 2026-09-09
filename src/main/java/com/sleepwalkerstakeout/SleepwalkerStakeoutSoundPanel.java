@@ -35,6 +35,7 @@ import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -42,7 +43,12 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Insets;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.Locale;
 
 @Slf4j
 public class SleepwalkerStakeoutSoundPanel extends PluginPanel {
@@ -57,6 +63,9 @@ public class SleepwalkerStakeoutSoundPanel extends PluginPanel {
 
     private final JButton previewButton =
             new JButton("Preview");
+
+    private final JButton deleteButton =
+            new JButton("Delete");
 
     private final JLabel statusLabel =
             new JLabel();
@@ -132,6 +141,12 @@ public class SleepwalkerStakeoutSoundPanel extends PluginPanel {
                         "/com/sleepwalkerstakeout/icons/reload_icon.png"
                 );
 
+        final BufferedImage addImage =
+                ImageUtil.loadImageResource(
+                        getClass(),
+                        "/com/sleepwalkerstakeout/icons/add_icon.png"
+                );
+
         final JButton reloadButton =
                 createIconButton(
                         refreshImage,
@@ -142,7 +157,18 @@ public class SleepwalkerStakeoutSoundPanel extends PluginPanel {
                 event -> reloadSounds()
         );
 
+        final JButton addButton =
+                createIconButton(
+                        addImage,
+                        "Add sound"
+                );
+
+        addButton.addActionListener(
+                event -> addSound()
+        );
+
         headerButtons.add(reloadButton);
+        headerButtons.add(addButton);
 
         headerPanel.add(
                 headerButtons,
@@ -209,6 +235,7 @@ public class SleepwalkerStakeoutSoundPanel extends PluginPanel {
             }
 
             clearStatus();
+            updateDeleteButton();
 
             configManager.setConfiguration(
                     SleepwalkerStakeoutConfig.GROUP,
@@ -258,6 +285,27 @@ public class SleepwalkerStakeoutSoundPanel extends PluginPanel {
         });
 
         content.add(previewButton);
+
+        content.add(
+                Box.createRigidArea(
+                        new Dimension(0, 8)
+                )
+        );
+
+        deleteButton.setAlignmentX(LEFT_ALIGNMENT);
+
+        deleteButton.setMaximumSize(
+                new Dimension(
+                        Integer.MAX_VALUE,
+                        30
+                )
+        );
+
+        deleteButton.addActionListener(
+                event -> deleteSelectedSound()
+        );
+
+        content.add(deleteButton);
 
         content.add(
                 Box.createRigidArea(
@@ -378,6 +426,7 @@ public class SleepwalkerStakeoutSoundPanel extends PluginPanel {
 
                 soundComboBox.setEnabled(false);
                 previewButton.setEnabled(false);
+                deleteButton.setEnabled(false);
 
                 return;
             }
@@ -388,6 +437,7 @@ public class SleepwalkerStakeoutSoundPanel extends PluginPanel {
 
             soundComboBox.setEnabled(true);
             previewButton.setEnabled(true);
+            deleteButton.setEnabled(true);
 
             if (selectedSound != null
                     && sounds.contains(selectedSound)) {
@@ -410,8 +460,171 @@ public class SleepwalkerStakeoutSoundPanel extends PluginPanel {
                     SleepwalkerStakeoutConfig.SELECTED_SOUND_KEY,
                     firstSound
             );
+
+            updateDeleteButton();
         } finally {
             reloading = false;
         }
+    }
+
+    private void addSound() {
+        final JFileChooser fileChooser =
+                new JFileChooser();
+
+        fileChooser.setDialogTitle("Add Sound");
+
+        fileChooser.setFileSelectionMode(
+                JFileChooser.FILES_ONLY
+        );
+
+        fileChooser.setAcceptAllFileFilterUsed(false);
+
+        fileChooser.setFileFilter(
+                new FileNameExtensionFilter(
+                        "WAV files (*.wav)",
+                        "wav"
+                )
+        );
+
+        final int result =
+                fileChooser.showOpenDialog(this);
+
+        if (result != JFileChooser.APPROVE_OPTION) {
+            return;
+        }
+
+        final Path source =
+                fileChooser
+                        .getSelectedFile()
+                        .toPath();
+
+        final String fileName =
+                source
+                        .getFileName()
+                        .toString();
+
+        if (!fileName
+                .toLowerCase(Locale.ROOT)
+                .endsWith(".wav")) {
+            showError(
+                    "Selected file must be a .wav file"
+            );
+            return;
+        }
+
+        final Path destination =
+                SleepwalkerStakeoutSoundPlayer
+                        .SOUND_DIR
+                        .resolve(fileName)
+                        .normalize();
+
+        try {
+            Files.copy(
+                    source,
+                    destination,
+                    StandardCopyOption.REPLACE_EXISTING
+            );
+
+            clearStatus();
+            reloadSounds();
+
+            soundComboBox.setSelectedItem(
+                    fileName
+            );
+
+            configManager.setConfiguration(
+                    SleepwalkerStakeoutConfig.GROUP,
+                    SleepwalkerStakeoutConfig.SELECTED_SOUND_KEY,
+                    fileName
+            );
+        } catch (IOException ex) {
+            log.warn(
+                    "Unable to add sound: {}",
+                    source,
+                    ex
+            );
+
+            showError(
+                    "Unable to add sound file"
+            );
+        }
+    }
+
+    private void deleteSelectedSound() {
+        final String selected =
+                (String) soundComboBox.getSelectedItem();
+
+        if (selected == null
+                || NO_SOUNDS.equals(selected)) {
+            return;
+        }
+
+        if ("sleepwalker.wav".equals(selected)) {
+            showError(
+                    "The default sound cannot be deleted"
+            );
+            return;
+        }
+
+        final int result =
+                JOptionPane.showConfirmDialog(
+                        this,
+                        "Delete " + selected + "?",
+                        "Delete Sound",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.WARNING_MESSAGE
+                );
+
+        if (result != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        final Path soundPath =
+                SleepwalkerStakeoutSoundPlayer
+                        .SOUND_DIR
+                        .resolve(selected)
+                        .normalize();
+
+        if (!soundPath.getParent().equals(
+                SleepwalkerStakeoutSoundPlayer.SOUND_DIR
+        )) {
+            showError(
+                    "Unable to delete sound file"
+            );
+            return;
+        }
+
+        try {
+            if (!Files.deleteIfExists(soundPath)) {
+                showError(
+                        "Sound file does not exist"
+                );
+                return;
+            }
+
+            clearStatus();
+            reloadSounds();
+        } catch (IOException ex) {
+            log.warn(
+                    "Unable to delete sound: {}",
+                    soundPath,
+                    ex
+            );
+
+            showError(
+                    "Unable to delete sound file"
+            );
+        }
+    }
+
+    private void updateDeleteButton() {
+        final String selected =
+                (String) soundComboBox.getSelectedItem();
+
+        deleteButton.setEnabled(
+                selected != null
+                        && !NO_SOUNDS.equals(selected)
+                        && !"sleepwalker.wav".equals(selected)
+        );
     }
 }
