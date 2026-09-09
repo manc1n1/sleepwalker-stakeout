@@ -18,8 +18,8 @@ against [Sleepwalkers](https://oldschool.runescape.wiki/w/Sleepwalker_(Phosani%2
 during [Phosani's Nightmare](https://oldschool.runescape.wiki/w/Phosani%27s_Nightmare)
 in [Old School RuneScape](https://oldschool.runescape.com/).
 
-Sleepwalker Stakeout can also play a configurable sound alongside the fake XP drop. Sounds can be selected, previewed,
-and managed through the plugin's RuneLite plugin panel.
+Sleepwalker Stakeout can also play a configurable sound alongside the fake XP drop. Sounds can be imported, selected,
+previewed, and managed directly through the plugin's RuneLite plugin panel.
 
 By default, fake XP drops are restricted to Sleepwalker targets. This restriction can optionally be disabled in the
 plugin settings to display fake XP drops for supported attacks against any target.
@@ -49,9 +49,10 @@ plugin settings to display fake XP drops for supported attacks against any targe
 - Renders above other overlays for improved visibility
 - Can play a sound whenever a fake XP drop appears
 - Includes a default `sleepwalker.wav` sound
-- Supports adding additional `.wav` sound files
+- Supports importing additional `.wav` sound files directly from the plugin panel
 - Includes a RuneLite plugin panel for managing sounds
 - Allows sounds to be selected and previewed directly from the plugin panel
+- Allows user-added sounds to be deleted from the plugin panel
 - Provides configurable sound volume from 0–100%
 - Saves the selected sound between RuneLite sessions
 - Allows the sound plugin panel button to be shown or hidden
@@ -143,43 +144,60 @@ Sleepwalker Stakeout includes an optional sound that can play alongside fake XP 
 A default sound named `sleepwalker.wav` is included with the plugin and automatically placed in the plugin's sounds
 directory if it does not already exist.
 
-Additional `.wav` files can be added to:
+Additional `.wav` files can be imported directly from the plugin panel using the **+** button.
+
+Imported sounds are stored in:
 
 ```text
 .runelite/sleepwalker-stakeout/sounds
 ```
 
-The exact `.runelite` location depends on the operating system and RuneLite installation.
-
 The plugin panel can be used to:
 
-- View available `.wav` files
+- Import additional `.wav` files
+- View available sounds
 - Select the active sound
 - Preview the selected sound
-- Reload the sound list after adding or removing files
+- Delete user-added sounds
+- Reload the sound list after files are added or removed
+
+When a new sound is imported, it is added to the sound list and can be selected for playback.
 
 The currently selected sound is saved automatically and restored the next time RuneLite is opened.
 
+The bundled `sleepwalker.wav` sound cannot be deleted from the plugin panel. User-added sounds can be removed using the
+**Delete** button.
+
 > [!NOTE]
-> WAV files must use an audio format supported by the Java audio system used by RuneLite. Files that cannot be decoded
-may not be playable.
+> WAV files must use an audio format supported by RuneLite's audio player. Unsupported or unreadable files may not be
+playable and will display an error in the plugin panel.
 
 ## Plugin Panel
 
 When enabled, Sleepwalker Stakeout adds an icon to the RuneLite side nav.
 
-The panel provides controls for managing available sounds without requiring filenames to be entered manually.
+The panel provides controls for managing available sounds without requiring filenames or directories to be entered
+manually.
 
 To add a sound:
 
 1. Open the Sleepwalker Stakeout plugin panel
-2. Open the sounds directory `.runelite/sleepwalker-stakeout/sounds`
-3. Add a `.wav` file to the directory
-4. Click the reload icon
-5. Select the sound from the dropdown
-6. Click Preview to test it
+2. Click the **+** icon
+3. Select a `.wav` file
+4. Select the sound from the dropdown
+5. Click **Preview** to test it
 
-The selected sound is saved automatically.
+The reload icon can be used to refresh the sound list after files are added or removed outside the plugin.
+
+To remove a user-added sound:
+
+1. Select the sound from the dropdown
+2. Click **Delete**
+3. Confirm the deletion
+
+The bundled `sleepwalker.wav` sound cannot be deleted.
+
+The selected sound is saved automatically between RuneLite sessions.
 
 The plugin panel button can be disabled with **Show plugin panel** without disabling sound playback itself.
 
@@ -210,7 +228,7 @@ Defaults to 50%.
 
 Controls the playback volume of the selected sound from 0–100%.
 
-The same volume setting is used for both normal sound playback and the Preview button in the plugin panel.
+The same volume setting is used for both normal sound playback and the **Preview** button in the plugin panel.
 
 ### Show plugin panel
 
@@ -284,7 +302,7 @@ configured target requirements are satisfied.
 The default settings are designed for use during Phosani's Nightmare and can be adjusted from the RuneLite plugin
 configuration panel.
 
-Sound selection and preview controls are available from the Sleepwalker Stakeout plugin panel.
+Sound importing, selection, preview, and management controls are available from the Sleepwalker Stakeout plugin panel.
 
 ## License
 
