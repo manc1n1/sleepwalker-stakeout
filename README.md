@@ -169,8 +169,8 @@ The bundled `sleepwalker.wav` sound cannot be deleted from the plugin panel. Use
 **Delete** button.
 
 > [!NOTE]
-> WAV files must use an audio format supported by RuneLite's audio player. Unsupported or unreadable files may not be
-playable and will display an error in the plugin panel.
+> WAV files must be compatible with RuneLite's audio player. Unsupported or unreadable files will display an error in
+the plugin panel.
 
 ## Plugin Panel
 
