@@ -30,27 +30,26 @@ import net.runelite.client.RuneLite;
 import net.runelite.client.audio.AudioPlayer;
 
 import javax.inject.Inject;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.Comparator;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 public class SleepwalkerStakeoutSoundPlayer {
     private static final String DEFAULT_SOUND = "sleepwalker.wav";
 
-    static final File SOUND_DIR =
-            new File(
-                    RuneLite.RUNELITE_DIR,
-                    "sleepwalker-stakeout/sounds"
-            );
+    static final Path SOUND_DIR =
+            RuneLite.RUNELITE_DIR.toPath()
+                    .resolve("sleepwalker-stakeout")
+                    .resolve("sounds")
+                    .normalize();
 
     private final AudioPlayer audioPlayer;
     private final ScheduledExecutorService executor;
@@ -65,11 +64,13 @@ public class SleepwalkerStakeoutSoundPlayer {
     }
 
     void initialize() {
-        if (!SOUND_DIR.exists()
-                && !SOUND_DIR.mkdirs()) {
+        try {
+            Files.createDirectories(SOUND_DIR);
+        } catch (IOException ex) {
             log.warn(
                     "Unable to create sound directory: {}",
-                    SOUND_DIR
+                    SOUND_DIR,
+                    ex
             );
             return;
         }
@@ -78,10 +79,10 @@ public class SleepwalkerStakeoutSoundPlayer {
     }
 
     private void copyDefaultSound() {
-        final File defaultSound =
-                new File(SOUND_DIR, DEFAULT_SOUND);
+        final Path defaultSound =
+                SOUND_DIR.resolve(DEFAULT_SOUND);
 
-        if (defaultSound.exists()) {
+        if (Files.exists(defaultSound)) {
             return;
         }
 
@@ -103,7 +104,7 @@ public class SleepwalkerStakeoutSoundPlayer {
 
             Files.copy(
                     inputStream,
-                    defaultSound.toPath()
+                    defaultSound
             );
 
             log.debug(
@@ -121,27 +122,30 @@ public class SleepwalkerStakeoutSoundPlayer {
     List<String> getAvailableSounds() {
         initialize();
 
-        final File[] files =
-                SOUND_DIR.listFiles(
-                        file -> file.isFile()
-                                && file.getName()
-                                .toLowerCase(Locale.ROOT)
-                                .endsWith(".wav")
-                );
+        try (
+                Stream<Path> paths =
+                        Files.list(SOUND_DIR)
+        ) {
+            return paths
+                    .filter(Files::isRegularFile)
+                    .map(Path::getFileName)
+                    .map(Path::toString)
+                    .filter(fileName ->
+                            fileName
+                                    .toLowerCase(Locale.ROOT)
+                                    .endsWith(".wav")
+                    )
+                    .sorted(String.CASE_INSENSITIVE_ORDER)
+                    .collect(Collectors.toList());
+        } catch (IOException ex) {
+            log.warn(
+                    "Unable to read sound directory: {}",
+                    SOUND_DIR,
+                    ex
+            );
 
-        if (files == null) {
             return List.of();
         }
-
-        return Arrays.stream(files)
-                .sorted(
-                        Comparator.comparing(
-                                File::getName,
-                                String.CASE_INSENSITIVE_ORDER
-                        )
-                )
-                .map(File::getName)
-                .collect(Collectors.toList());
     }
 
     void play(
@@ -178,18 +182,42 @@ public class SleepwalkerStakeoutSoundPlayer {
             return;
         }
 
-        final File soundFile =
-                new File(SOUND_DIR, fileName);
+        final Path soundPath =
+                SOUND_DIR.resolve(fileName)
+                        .normalize();
+
+        if (!SOUND_DIR.equals(soundPath.getParent())) {
+            reportError(
+                    "Selected sound is outside the sounds folder",
+                    onError
+            );
+            return;
+        }
+
+        if (!Files.isRegularFile(soundPath)) {
+            reportError(
+                    "Sound file does not exist",
+                    onError
+            );
+            return;
+        }
+
+        if (!Files.isReadable(soundPath)) {
+            reportError(
+                    "Sound file cannot be read",
+                    onError
+            );
+            return;
+        }
 
         try {
-            final File canonicalDirectory =
-                    SOUND_DIR.getCanonicalFile();
+            final Path realDirectory =
+                    SOUND_DIR.toRealPath();
 
-            final File canonicalSound =
-                    soundFile.getCanonicalFile();
+            final Path realSound =
+                    soundPath.toRealPath();
 
-            if (!canonicalSound.getParentFile()
-                    .equals(canonicalDirectory)) {
+            if (!realDirectory.equals(realSound.getParent())) {
                 reportError(
                         "Selected sound is outside the sounds folder",
                         onError
@@ -199,7 +227,7 @@ public class SleepwalkerStakeoutSoundPlayer {
         } catch (IOException ex) {
             log.warn(
                     "Unable to resolve sound: {}",
-                    fileName,
+                    soundPath,
                     ex
             );
 
@@ -210,24 +238,11 @@ public class SleepwalkerStakeoutSoundPlayer {
             return;
         }
 
-        if (!soundFile.isFile()) {
-            reportError(
-                    "Sound file does not exist",
-                    onError
-            );
-            return;
-        }
-
-        if (!Files.isReadable(soundFile.toPath())) {
-            reportError(
-                    "Sound file cannot be read",
-                    onError
-            );
-            return;
-        }
-
         final int clampedVolume =
-                Math.max(0, Math.min(volume, 100));
+                Math.max(
+                        0,
+                        Math.min(volume, 100)
+                );
 
         if (clampedVolume == 0) {
             return;
@@ -239,13 +254,13 @@ public class SleepwalkerStakeoutSoundPlayer {
         executor.execute(() -> {
             try {
                 audioPlayer.play(
-                        soundFile,
+                        soundPath.toFile(),
                         gain
                 );
             } catch (Exception ex) {
                 log.warn(
                         "Unable to play sound: {}",
-                        soundFile,
+                        soundPath,
                         ex
                 );
 

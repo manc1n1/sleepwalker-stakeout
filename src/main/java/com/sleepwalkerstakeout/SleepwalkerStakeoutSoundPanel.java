@@ -30,14 +30,19 @@ import net.runelite.client.config.ConfigManager;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.PluginPanel;
 import net.runelite.client.util.ImageUtil;
+import net.runelite.client.util.LinkBrowser;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.Insets;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.util.List;
 
 @Slf4j
@@ -424,34 +429,10 @@ public class SleepwalkerStakeoutSoundPanel extends PluginPanel {
     private void openSoundDirectory() {
         soundPlayer.initialize();
 
-        if (!Desktop.isDesktopSupported()) {
-            log.warn(
-                    "Desktop operations are not supported"
-            );
-            return;
-        }
-
-        final Desktop desktop =
-                Desktop.getDesktop();
-
-        if (!desktop.isSupported(
-                Desktop.Action.OPEN
-        )) {
-            log.warn(
-                    "Opening directories is not supported"
-            );
-            return;
-        }
-
-        try {
-            desktop.open(
-                    SleepwalkerStakeoutSoundPlayer.SOUND_DIR
-            );
-        } catch (IOException ex) {
-            log.warn(
-                    "Unable to open sound directory",
-                    ex
-            );
-        }
+        LinkBrowser.open(
+                SleepwalkerStakeoutSoundPlayer
+                        .SOUND_DIR
+                        .toString()
+        );
     }
 }
