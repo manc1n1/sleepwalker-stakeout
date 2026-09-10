@@ -94,7 +94,7 @@ attack animation is detected.
 This provides a more consistent way to track Sleepwalker attacks without relying exclusively on XP drops, character
 animations, or other game-world visuals.
 
-## Other Targets
+### Other Targets
 
 The plugin can also be configured to display fake XP drops for supported attacks against targets other than
 Sleepwalkers.
