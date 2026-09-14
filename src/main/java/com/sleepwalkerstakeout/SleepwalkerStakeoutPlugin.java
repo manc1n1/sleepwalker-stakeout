@@ -74,13 +74,11 @@ import java.util.Set;
 public class SleepwalkerStakeoutPlugin extends Plugin {
     private static final String CONFIG_LAST_SEEN_VERSION = "lastSeenVersion";
 
-    private static final String PLUGIN_VERSION = "1.3.0";
+    private static final String PLUGIN_VERSION = "1.3.1";
 
     private static final String UPDATE_MESSAGE =
             "<colHIGHLIGHT>Sleepwalker Stakeout v" + PLUGIN_VERSION + ":<br>"
-                    + "<colHIGHLIGHT>* Added optional sound effects for fake XP drops.<br>"
-                    + "<colHIGHLIGHT>* Added a plugin panel for importing, previewing, and managing sounds.<br>"
-                    + "<colHIGHLIGHT>* Added volume and plugin panel visibility settings.";
+                    + "<colHIGHLIGHT>* Polished the plugin panel UI and instructions.";
 
     private static final int TARGET_NPC_ID = 9470; // Sleepwalker (Phosani's Nightmare)
 
