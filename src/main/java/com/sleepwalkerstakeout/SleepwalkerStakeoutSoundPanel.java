@@ -141,10 +141,10 @@ public class SleepwalkerStakeoutSoundPanel extends PluginPanel {
                         "/com/sleepwalkerstakeout/icons/reload_icon.png"
                 );
 
-        final BufferedImage addImage =
+        final BufferedImage folderImage =
                 ImageUtil.loadImageResource(
                         getClass(),
-                        "/com/sleepwalkerstakeout/icons/add_icon.png"
+                        "/com/sleepwalkerstakeout/icons/folder_icon.png"
                 );
 
         final JButton reloadButton =
@@ -157,18 +157,18 @@ public class SleepwalkerStakeoutSoundPanel extends PluginPanel {
                 event -> reloadSounds()
         );
 
-        final JButton addButton =
+        final JButton folderButton =
                 createIconButton(
-                        addImage,
+                        folderImage,
                         "Add sound"
                 );
 
-        addButton.addActionListener(
-                event -> addSound()
+        folderButton.addActionListener(
+                event -> importSound()
         );
 
         headerButtons.add(reloadButton);
-        headerButtons.add(addButton);
+        headerButtons.add(folderButton);
 
         headerPanel.add(
                 headerButtons,
@@ -333,12 +333,10 @@ public class SleepwalkerStakeoutSoundPanel extends PluginPanel {
     private static JTextArea createInstructions() {
         final JTextArea instructions =
                 new JTextArea(
-                        "Add .wav files to directory:\n"
-                                + ".runelite/\n"
-                                + "sleepwalker-stakeout/\n"
-                                + "sounds\n\n"
-                                + "Use reload after adding or removing files.\n\n"
-                                + "Your selected sound is saved automatically."
+                        "Import .wav files to:\n"
+                                + ".runelite/sleepwalker-stakeout\n"
+                                + "/sounds\n\n"
+                                + "Use the folder icon above to import a sound."
                 );
 
         instructions.setEditable(false);
@@ -467,11 +465,11 @@ public class SleepwalkerStakeoutSoundPanel extends PluginPanel {
         }
     }
 
-    private void addSound() {
+    private void importSound() {
         final JFileChooser fileChooser =
                 new JFileChooser();
 
-        fileChooser.setDialogTitle("Add Sound");
+        fileChooser.setDialogTitle("Import Sound");
 
         fileChooser.setFileSelectionMode(
                 JFileChooser.FILES_ONLY
@@ -507,7 +505,7 @@ public class SleepwalkerStakeoutSoundPanel extends PluginPanel {
                 .toLowerCase(Locale.ROOT)
                 .endsWith(".wav")) {
             showError(
-                    "Selected file must be a .wav file"
+                    "Selected file must be a .wav file."
             );
             return;
         }
@@ -539,13 +537,13 @@ public class SleepwalkerStakeoutSoundPanel extends PluginPanel {
             );
         } catch (IOException ex) {
             log.warn(
-                    "Unable to add sound: {}",
+                    "Unable to import sound: {}",
                     source,
                     ex
             );
 
             showError(
-                    "Unable to add sound file"
+                    "Unable to import sound file."
             );
         }
     }
@@ -561,7 +559,7 @@ public class SleepwalkerStakeoutSoundPanel extends PluginPanel {
 
         if ("sleepwalker.wav".equals(selected)) {
             showError(
-                    "The default sound cannot be deleted"
+                    "The default sound cannot be deleted."
             );
             return;
         }
@@ -589,7 +587,7 @@ public class SleepwalkerStakeoutSoundPanel extends PluginPanel {
                 SleepwalkerStakeoutSoundPlayer.SOUND_DIR
         )) {
             showError(
-                    "Unable to delete sound file"
+                    "Unable to delete sound file."
             );
             return;
         }
@@ -597,7 +595,7 @@ public class SleepwalkerStakeoutSoundPanel extends PluginPanel {
         try {
             if (!Files.deleteIfExists(soundPath)) {
                 showError(
-                        "Sound file does not exist"
+                        "Sound file does not exist."
                 );
                 return;
             }
@@ -612,7 +610,7 @@ public class SleepwalkerStakeoutSoundPanel extends PluginPanel {
             );
 
             showError(
-                    "Unable to delete sound file"
+                    "Unable to delete sound file."
             );
         }
     }
