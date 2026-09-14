@@ -95,9 +95,17 @@ if ! git remote get-url upstream &>/dev/null; then
   exit 1
 fi
 
+if ! git remote get-url origin &>/dev/null; then
+  echo "Error: Plugin Hub repository has no 'origin' remote." >&2
+  echo >&2
+  echo "Expected origin to point to your Plugin Hub fork." >&2
+  exit 1
+fi
+
 plugin_file="plugins/$plugin_name"
 
 git fetch upstream
+git fetch --prune origin
 
 if ! git cat-file -e "upstream/master:$plugin_file" 2>/dev/null; then
   echo "Error: Plugin Hub entry not found:" >&2
@@ -155,13 +163,6 @@ fi
 
 if [[ -n "$(git status --porcelain)" ]]; then
   echo "Error: Plugin Hub working tree has uncommitted changes." >&2
-  exit 1
-fi
-
-if ! git remote get-url origin &>/dev/null; then
-  echo "Error: Plugin Hub repository has no 'origin' remote." >&2
-  echo >&2
-  echo "Expected origin to point to your Plugin Hub fork." >&2
   exit 1
 fi
 
