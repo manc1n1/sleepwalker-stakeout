@@ -89,12 +89,12 @@ public interface SleepwalkerStakeoutConfig extends Config {
     }
 
     @ConfigItem(
-            keyName = "showUpdateMessages",
-            name = "Show update messages",
+            keyName = "showUpdateMessage",
+            name = "Show update message",
             description = "Show a one-time chat message when Sleepwalker Stakeout is updated",
             position = 4
     )
-    default boolean showUpdateMessages() {
+    default boolean showUpdateMessage() {
         return true;
     }
 }

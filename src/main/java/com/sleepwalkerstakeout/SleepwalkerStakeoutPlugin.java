@@ -74,11 +74,11 @@ import java.util.Set;
 public class SleepwalkerStakeoutPlugin extends Plugin {
     private static final String CONFIG_LAST_SEEN_VERSION = "lastSeenVersion";
 
-    private static final String PLUGIN_VERSION = "1.3.1";
+    private static final String PLUGIN_VERSION = "1.3.2";
 
     private static final String UPDATE_MESSAGE =
             "<colHIGHLIGHT>Sleepwalker Stakeout v" + PLUGIN_VERSION + ":<br>"
-                    + "<colHIGHLIGHT>* Polished the plugin panel UI and instructions.";
+                    + "<colHIGHLIGHT>* Fixed \"Show plugin panel\" option.";
 
     private static final int TARGET_NPC_ID = 9470; // Sleepwalker (Phosani's Nightmare)
 
@@ -182,7 +182,7 @@ public class SleepwalkerStakeoutPlugin extends Plugin {
             return;
         }
 
-        if (!event.getKey().equals("showSidePanel")) {
+        if (!event.getKey().equals("showPluginPanel")) {
             return;
         }
 
@@ -299,7 +299,7 @@ public class SleepwalkerStakeoutPlugin extends Plugin {
                 PLUGIN_VERSION
         );
 
-        if (!config.showUpdateMessages()) {
+        if (!config.showUpdateMessage()) {
             return;
         }
 
