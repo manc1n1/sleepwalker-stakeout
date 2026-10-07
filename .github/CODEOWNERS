@@ -1,0 +1,5 @@
+# Default owner for the entire repository
+* @manc1n1
+
+# Explicitly protect the CODEOWNERS file itself
+/.github/CODEOWNERS @manc1n1
